@@ -23,7 +23,7 @@ console.log(template);
 
 ## Installation
 
-```
+```bash
 npm install --save-dev rollup-plugin-scoped
 ```
 
