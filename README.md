@@ -21,6 +21,11 @@ console.log(style);
 console.log(template);
 ```
 
+## Build-in extensions
+
++ style: `*.css` `*.sass` `*.scss` `*.less` `*.styl`
++ template: `*.tpl` `*.html` `*.jade`
+
 ## Installation
 
 ```bash
