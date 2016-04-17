@@ -1,7 +1,7 @@
 {
   "name": "rollup-plugin-scoped",
   "version": "0.0.3",
-  "description": "Roll and create scope for style and template.",
+  "description": "Roll and create scoped style and template.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
