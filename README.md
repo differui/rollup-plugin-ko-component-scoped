@@ -14,8 +14,8 @@ console.log(template);
 Create scoped template and style:
 
 ```js
-import style form '!scoped./btn.scss';
-import template form '!scoped./btn.tpl';
+import style form 'scoped!./btn.scss';
+import template form 'scoped!./btn.tpl';
 
 console.log(style);
 console.log(template);
