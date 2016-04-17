@@ -1,14 +1,14 @@
 {
-  "name": "rollup-plugin-ko-component-scoped",
-  "version": "0.0.1",
-  "description": "Roll scoped style and template for ko component.",
+  "name": "rollup-plugin-scoped",
+  "version": "0.0.3",
+  "description": "Roll and create scope for style and template.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/differui/rollup-plugin-ko-component-scoped.git"
+    "url": "git+https://github.com/differui/rollup-plugin-scoped.git"
   },
   "keywords": [
     "knockout",
@@ -17,7 +17,7 @@
   "author": "BinRui.Guan <differui@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/differui/rollup-plugin-ko-component-scoped/issues"
+    "url": "https://github.com/differui/rollup-plugin-scoped/issues"
   },
   "homepage": "https://github.com/differui/rollup-plugin-ko-component-scoped#readme",
   "dependencies": {
