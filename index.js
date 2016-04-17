@@ -70,10 +70,15 @@ module.exports = function () {
 
             delete scopedIdMap[id];
 
-            return new Promise(function (resolve) {
+            return new Promise(function (resolve, reject) {
                 promise.then(function (result) {
-                    resolve(result.source);
+                    resolve({
+                        code: `export default ${JSON.stringify(result.source)}`,
+                        map: { mappings: '' }
+                    });
                 });
+
+                promise.catch(reject);
             });
         }
     };
