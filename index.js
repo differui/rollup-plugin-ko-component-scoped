@@ -1,43 +1,47 @@
 var path = require('path');
 var parse5 = require('parse5');
 var hash  = require('hash-sum');
-var compiler = require('ko-component-compiler');
-var rollupPluginutils = require('rollup-pluginutils');
+const compiler = require('ko-component-compiler');
+const rollupPluginutils = require('rollup-pluginutils');
 
 const SCOPED_PREFIX = 'scoped!';
 const SCOPED_PREFIX_LEN = SCOPED_PREFIX.length;
-const STYLE_LANG_MAP = {
+
+const buildInStyleLang = {
     '.css': '',
     '.sass': 'sass',
     '.scss': 'sass',
     '.styl': 'style',
     '.less': 'less'
 };
-const TEMPLATE_LANG_MAP = {
+const buildInTemplateLang = {
     '.tpl': '',
     '.html': '',
     '.jade': 'jade'
 };
 
+const buildInExtensions = Object.keys(buildInStyleLang).concat(Object.keys(buildInTemplateLang));
+const includeExtensions = buildInExtensions.map(function (ext) { return '**/*' + ext; });
+const scopedIdRe = new RegExp('^' + SCOPED_PREFIX, 'i');
+const scopedIdMap = {};
+
+function has(target, key) {
+    return target && target.hasOwnProperty(key);
+}
+
+function mockStyleNode(code, lang, scoped) {
+    const tpl = `<style lang="${lang || ''}" scoped>\n${code}</style>`;
+    return parse5.parseFragment(tpl, { locationInfo: true }).childNodes[0];
+}
+
+function mockTemplateNode(code, lang, scoped) {
+    const tpl = `<template lang="${lang || ''}" scoped>\n${code}</template>`;
+    return parse5.parseFragment(tpl, { locationInfo: true }).childNodes[0];
+}
+
 module.exports = function () {
     var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-    var extensions = options.extensions || Object.keys(STYLE_LANG_MAP).concat(Object.keys(TEMPLATE_LANG_MAP));
-    var include = extensions.map(function (ext) { return '**/*' + ext; });
-    var filter = rollupPluginutils.createFilter(include, options.exclude || 'node_modules/**');
-    var scopedIdRe = new RegExp('^' + SCOPED_PREFIX, 'i');
-    var scopedIdMap = {};
-
-    function mockStyleNode(code, lang) {
-        var tpl = `<style lang="${lang || ''}" scoped>\n${code}</style>`;
-
-        return parse5.parseFragment(tpl, { locationInfo: true }).childNodes[0];
-    }
-
-    function mockTemplateNode(code, lang) {
-        var tpl = `<template lang="${lang || ''}" scoped>\n${code}</template>`;
-
-        return parse5.parseFragment(tpl, { locationInfo: true }).childNodes[0];
-    }
+    var filter = rollupPluginutils.createFilter(includeExtensions, options.exclude || 'node_modules/**');
 
     return {
         resolveId: function (importee, importer) {
@@ -54,18 +58,18 @@ module.exports = function () {
             return importeeId;
         },
         transform: function (code, id) {
-            if (!filter(id) || !scopedIdMap[id]) {
+            if (!filter(id) && !scopedIdMap[id]) {
                 return null;
             }
 
-            var ext = path.parse(id).ext.toLowerCase();
-            var scopedId = scopedIdMap[id];
+            const ext = path.parse(id).ext.toLowerCase();
+            const scopedId = scopedIdMap[id];
             var promise = null;
 
-            if (STYLE_LANG_MAP.hasOwnProperty(ext)) {
-                promise = compiler.processStyle(mockStyleNode(code, STYLE_LANG_MAP[ext]), scopedId);
-            } else if (TEMPLATE_LANG_MAP.hasOwnProperty(ext)) {
-                promise = compiler.processTemplate(mockTemplateNode(code, TEMPLATE_LANG_MAP[ext]), scopedId);
+            if (has(buildInStyleLang, ext)) {
+                promise = compiler.processStyle(mockStyleNode(code, buildInStyleLang[ext]), scopedId);
+            } else if (has(buildInTemplateLang, ext)) {
+                promise = compiler.processTemplate(mockTemplateNode(code, buildInTemplateLang[ext]), scopedId);
             }
 
             delete scopedIdMap[id];
