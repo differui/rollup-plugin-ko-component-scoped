@@ -67,9 +67,9 @@ module.exports = function () {
             var promise = null;
 
             if (has(buildInStyleLang, ext)) {
-                promise = compiler.processStyle(mockStyleNode(code, buildInStyleLang[ext]), scopedId);
+                promise = compiler.processStyle(mockStyleNode(code, buildInStyleLang[ext]), scopedId, id);
             } else if (has(buildInTemplateLang, ext)) {
-                promise = compiler.processTemplate(mockTemplateNode(code, buildInTemplateLang[ext]), scopedId);
+                promise = compiler.processTemplate(mockTemplateNode(code, buildInTemplateLang[ext]), scopedId, id);
             }
 
             delete scopedIdMap[id];
