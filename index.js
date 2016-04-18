@@ -58,7 +58,7 @@ module.exports = function () {
             return importeeId;
         },
         transform: function (code, id) {
-            if (!filter(id) && !scopedIdMap[id]) {
+            if (!filter(id) || !scopedIdMap[id]) {
                 return null;
             }
 
