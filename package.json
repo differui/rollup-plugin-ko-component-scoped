@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-scoped",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "Roll and create scoped style and template.",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,7 @@
   "homepage": "https://github.com/differui/rollup-plugin-ko-component-scoped#readme",
   "dependencies": {
     "hash-sum": "^1.0.2",
-    "ko-component-compiler": "^0.4.5",
+    "ko-component-compiler": "^0.4.7",
     "parse5": "^2.1.5",
     "rollup-pluginutils": "^1.3.1"
   }
