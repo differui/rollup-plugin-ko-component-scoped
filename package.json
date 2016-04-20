@@ -3,7 +3,7 @@
   "version": "0.0.9",
   "description": "Roll and create scoped style and template.",
   "main": "dist/index.js",
-  "jsnext:main": "index.js",
+  "jsnext:main": "src/index.js",
   "scripts": {
     "prebuild": "rm -rf dist && mkdir dist",
     "build": "rollup -c cjs -o dist/index.js",

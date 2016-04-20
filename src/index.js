@@ -2,9 +2,9 @@ import { readFileSync } from 'fs';
 import { resolve, parse } from 'path';
 import hash from 'hash-sum';
 import { processStyle, processTemplate } from 'ko-component-compiler';
-import { has } from './lib/util';
-import { mockStyleNode, mockTemplateNode } from './lib/template';
-import { style as styleLang, template as templateLang } from './lib/lang';
+import { has } from './util';
+import { mockStyleNode, mockTemplateNode } from './template';
+import { style as styleLang, template as templateLang } from './lang';
 
 const SCOPED_PREFIX = 'scoped!';
 const SCOPED_EXTENSION = '.__scoped__';
