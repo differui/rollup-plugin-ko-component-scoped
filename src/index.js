@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
-import { resolve, parse } from 'path';
 import hash from 'hash-sum';
+import { resolve, parse } from 'path';
 import { processStyle, processTemplate } from 'ko-component-compiler';
 import { has } from './util';
 import { mockStyleNode, mockTemplateNode } from './template';
@@ -32,12 +32,14 @@ export default (options) => {
             };
 
             return mockImporteeId;
-        }
+        },
+
         load(id) {
             if (has(scopedCodeMap, id)) {
-                return fs.readFileSync(sourceCodeMap.id, 'utf-8');
+                return fs.readFileSync(scopedCodeMap.id, 'utf-8');
             }
-        }
+        },
+
         transform(code, id) {
             if (!has(scopedCodeMap, id)) {
                 return null;

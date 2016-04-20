@@ -6,7 +6,7 @@
   "jsnext:main": "src/index.js",
   "scripts": {
     "prebuild": "rm -rf dist && mkdir dist",
-    "build": "rollup -c cjs -o dist/index.js",
+    "build": "rollup -c -f cjs -o dist/index.js",
     "publish": "npm run build"
   },
   "repository": {
