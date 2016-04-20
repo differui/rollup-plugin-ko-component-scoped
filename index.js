@@ -1,94 +1,65 @@
-var path = require('path');
-var parse5 = require('parse5');
-var hash  = require('hash-sum');
-const compiler = require('ko-component-compiler');
-const rollupPluginutils = require('rollup-pluginutils');
+import { readFileSync } from 'fs';
+import { resolve, parse } from 'path';
+import hash from 'hash-sum';
+import { processStyle, processTemplate } from 'ko-component-compiler';
+import { has } from './lib/util';
+import { mockStyleNode, mockTemplateNode } from './lib/template';
+import { style as styleLang, template as templateLang } from './lib/lang';
 
-// importee id prefix
 const SCOPED_PREFIX = 'scoped!';
-const SCOPED_PREFIX_LEN = SCOPED_PREFIX.length;
+const SCOPED_EXTENSION = '.__scoped__';
 
-// export format
-const SCOPED_FORMAT_ES2015 = 'es2015';
-const SCOPED_FORMAT_STRING = 'string';
-
-const buildInStyleLang = {
-    '.css': '',
-    '.sass': 'sass',
-    '.scss': 'sass',
-    '.styl': 'style',
-    '.less': 'less'
-};
-const buildInTemplateLang = {
-    '.tpl': '',
-    '.html': '',
-    '.jade': 'jade'
-};
-
-const buildInExtensions = Object.keys(buildInStyleLang).concat(Object.keys(buildInTemplateLang));
-const includeExtensions = buildInExtensions.map(function (ext) { return '**/*' + ext; });
+const scopePrefixLen = SCOPED_PREFIX.length;
 const scopedIdRe = new RegExp('^' + SCOPED_PREFIX, 'i');
-const scopedIdMap = {};
+const scopedCodeMap = {};
 
-function has(target, key) {
-    return target && target.hasOwnProperty(key);
-}
+extensions.push(SCOPED_EXTENSION);
 
-function mockStyleNode(code, lang, scoped) {
-    const tpl = `<style lang="${lang || ''}" scoped>\n${code}</style>`;
-    return parse5.parseFragment(tpl, { locationInfo: true }).childNodes[0];
-}
-
-function mockTemplateNode(code, lang, scoped) {
-    const tpl = `<template lang="${lang || ''}" scoped>\n${code}</template>`;
-    return parse5.parseFragment(tpl, { locationInfo: true }).childNodes[0];
-}
-
-module.exports = function () {
-    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-    var filter = rollupPluginutils.createFilter(includeExtensions, options.exclude || 'node_modules/**');
-
-    options.format = options.format || SCOPED_FORMAT_ES2015;
-
+export default (options) => {
     return {
-        resolveId: function (importee, importer) {
-            var importeeId;
-
+        resolveId(importee, importer) {
             if (!scopedIdRe.test(importee)) {
                 return null;
             }
 
-            importeeId = importee.substr(SCOPED_PREFIX_LEN);
-            importeeId = path.resolve(path.parse(importer).dir, importeeId);
-            scopedIdMap[importeeId] = hash(importer);
+            let importerHashId = hash(importer);
+            let mockImporteeId = `${importerHashId}${SCOPED_EXTENSION}`;
+            let realImporteeId = resolve(parse(importer).dir, importee.substr(scopePrefixLen));
 
-            return importeeId;
-        },
-        transform: function (code, id) {
-            if (!filter(id) || !scopedIdMap[id]) {
+            scopedCodeMap[mockImporteeId] = {
+                id: realImporteeId,
+                hash: importerHashId
+            };
+
+            return mockImporteeId;
+        }
+        load(id) {
+            if (has(scopedCodeMap, id)) {
+                return fs.readFileSync(sourceCodeMap.id, 'utf-8');
+            }
+        }
+        transform(code, id) {
+            if (!has(scopedCodeMap, id)) {
                 return null;
             }
 
-            const ext = path.parse(id).ext.toLowerCase();
-            const scopedId = scopedIdMap[id];
-            var promise = null;
+            const ext = parse(scopedCodeMap[id].id).ext.toLowerCase();
+            const hashId = scopedCodeMap[id].hash;
 
-            if (has(buildInStyleLang, ext)) {
-                promise = compiler.processStyle(mockStyleNode(code, buildInStyleLang[ext]), scopedId, id);
-            } else if (has(buildInTemplateLang, ext)) {
-                promise = compiler.processTemplate(mockTemplateNode(code, buildInTemplateLang[ext]), scopedId, id);
+            let promise;
+
+            if (has(styleLang, ext)) {
+                promise = processStyle(mockStyleNode(code, styleLang[ext]), hashId, id);
+            } else if (has(templateLang, ext)) {
+                promise = processTemplate(mockTemplateNode(code, templateLang[ext]), hashId, id);
             }
 
-            delete scopedIdMap[id];
+            delete scopedCodeMap[id];
 
-            return new Promise(function (resolve, reject) {
-                promise.then(function (result) {
-                    if (options.format === SCOPED_FORMAT_ES2015) {
-                        result.source = `export default ${JSON.stringify(result.source)};`;
-                    }
-
+            return new Promise((resolve, reject) => {
+                promise.then((result) => {
                     resolve({
-                        code: result.source,
+                        code: `export default ${JSON.stringify(result.source)};`,
                         map: { mappings: '' }
                     });
                 });
