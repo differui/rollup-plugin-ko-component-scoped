@@ -2,7 +2,7 @@
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var fs$1 = require('fs');
+var fs = require('fs');
 var hash = _interopDefault(require('hash-sum'));
 var path = require('path');
 var koComponentCompiler = require('ko-component-compiler');
@@ -13,18 +13,18 @@ function has(target, key) {
 };
 
 function mockStyleNode(code, lang, scoped) {
-    const tpl = `<style lang="${ lang || '' }" scoped>\n${ code }</style>`;
+    var tpl = '<style lang="' + (lang || '') + '" scoped>\n' + code + '</style>';
 
     return parse5.parseFragment(tpl, { locationInfo: true }).childNodes[0];
 };
 
 function mockTemplateNode(code, lang, scoped) {
-    const tpl = `<template lang="${ lang || '' }" scoped>\n${ code }</template>`;
+    var tpl = '<template lang="' + (lang || '') + '" scoped>\n' + code + '</template>';
 
     return parse5.parseFragment(tpl, { locationInfo: true }).childNodes[0];
 };
 
-const style = {
+var style = {
     '.css': '',
     '.sass': 'sass',
     '.scss': 'sass',
@@ -32,68 +32,64 @@ const style = {
     '.less': 'less'
 };
 
-const template = {
+var template = {
     '.tpl': '',
     '.html': '',
     '.jade': 'jade'
 };
 
-const SCOPED_PREFIX = 'scoped!';
-const SCOPED_EXTENSION = '.__scoped__';
+var SCOPED_PREFIX = 'scoped!';
+var SCOPED_EXTENSION = '.__scoped__';
 
-const scopePrefixLen = SCOPED_PREFIX.length;
-const scopedIdRe = new RegExp('^' + SCOPED_PREFIX, 'i');
-const scopedCodeMap = {};
+var scopePrefixLen = SCOPED_PREFIX.length;
+var scopedIdRe = new RegExp('^' + SCOPED_PREFIX, 'i');
+var scopedCodeMap = {};
 
-extensions.push(SCOPED_EXTENSION);
-
-var index = (options => {
+var index = (function (options) {
     return {
-        resolveId(importee, importer) {
+        resolveId: function resolveId(importee, importer) {
             if (!scopedIdRe.test(importee)) {
                 return null;
             }
 
-            let importerHashId = hash(importer);
-            let mockImporteeId = `${ importerHashId }${ SCOPED_EXTENSION }`;
-            let realImporteeId = path.resolve(path.parse(importer).dir, importee.substr(scopePrefixLen));
+            var realImporteeId = path.resolve(path.parse(importer).dir, importee.substr(scopePrefixLen));
+            var mockImporteeId = '' + importee + importer + SCOPED_EXTENSION;
 
             scopedCodeMap[mockImporteeId] = {
-                id: realImporteeId,
-                hash: importerHashId
+                path: realImporteeId,
+                hash: hash(importer)
             };
 
             return mockImporteeId;
         },
-
-        load(id) {
+        load: function load(id) {
             if (has(scopedCodeMap, id)) {
-                return fs.readFileSync(scopedCodeMap.id, 'utf-8');
+                return fs.readFileSync(scopedCodeMap[id].path, 'utf-8');
             }
         },
-
-        transform(code, id) {
+        transform: function transform(code, id) {
             if (!has(scopedCodeMap, id)) {
                 return null;
             }
 
-            const ext = path.parse(scopedCodeMap[id].id).ext.toLowerCase();
-            const hashId = scopedCodeMap[id].hash;
+            var hashId = scopedCodeMap[id].hash;
+            var filePath = scopedCodeMap[id].path;
+            var ext = path.parse(filePath).ext.toLowerCase();
 
-            let promise;
+            var promise = void 0;
 
             if (has(style, ext)) {
-                promise = koComponentCompiler.processStyle(mockStyleNode(code, style[ext]), hashId, id);
+                promise = koComponentCompiler.processStyle(mockStyleNode(code, style[ext]), hashId, filePath);
             } else if (has(template, ext)) {
-                promise = koComponentCompiler.processTemplate(mockTemplateNode(code, template[ext]), hashId, id);
+                promise = koComponentCompiler.processTemplate(mockTemplateNode(code, template[ext]), hashId, filePath);
             }
 
             delete scopedCodeMap[id];
 
-            return new Promise((resolve, reject) => {
-                promise.then(result => {
+            return new Promise(function (resolve, reject) {
+                promise.then(function (result) {
                     resolve({
-                        code: `export default ${ JSON.stringify(result.source) };`,
+                        code: 'export default ' + JSON.stringify(result.source) + ';',
                         map: { mappings: '' }
                     });
                 });

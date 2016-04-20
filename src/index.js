@@ -13,8 +13,6 @@ const scopePrefixLen = SCOPED_PREFIX.length;
 const scopedIdRe = new RegExp('^' + SCOPED_PREFIX, 'i');
 const scopedCodeMap = {};
 
-extensions.push(SCOPED_EXTENSION);
-
 export default (options) => {
     return {
         resolveId(importee, importer) {
@@ -22,13 +20,12 @@ export default (options) => {
                 return null;
             }
 
-            let importerHashId = hash(importer);
-            let mockImporteeId = `${importerHashId}${SCOPED_EXTENSION}`;
             let realImporteeId = resolve(parse(importer).dir, importee.substr(scopePrefixLen));
+            let mockImporteeId = `${importee}${importer}${SCOPED_EXTENSION}`;
 
             scopedCodeMap[mockImporteeId] = {
-                id: realImporteeId,
-                hash: importerHashId
+                path: realImporteeId,
+                hash: hash(importer)
             };
 
             return mockImporteeId;
@@ -36,7 +33,7 @@ export default (options) => {
 
         load(id) {
             if (has(scopedCodeMap, id)) {
-                return fs.readFileSync(scopedCodeMap.id, 'utf-8');
+                return readFileSync(scopedCodeMap[id].path, 'utf-8');
             }
         },
 
@@ -45,15 +42,16 @@ export default (options) => {
                 return null;
             }
 
-            const ext = parse(scopedCodeMap[id].id).ext.toLowerCase();
             const hashId = scopedCodeMap[id].hash;
+            const filePath = scopedCodeMap[id].path;
+            const ext = parse(filePath).ext.toLowerCase();
 
             let promise;
 
             if (has(styleLang, ext)) {
-                promise = processStyle(mockStyleNode(code, styleLang[ext]), hashId, id);
+                promise = processStyle(mockStyleNode(code, styleLang[ext]), hashId, filePath);
             } else if (has(templateLang, ext)) {
-                promise = processTemplate(mockTemplateNode(code, templateLang[ext]), hashId, id);
+                promise = processTemplate(mockTemplateNode(code, templateLang[ext]), hashId, filePath);
             }
 
             delete scopedCodeMap[id];
