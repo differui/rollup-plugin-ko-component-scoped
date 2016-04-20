@@ -7,7 +7,9 @@
   "scripts": {
     "prebuild": "rm -rf dist && mkdir dist",
     "build": "rollup -c -f cjs -o dist/index.js",
-    "publish": "npm run build"
+    "prepublish": "npm run test",
+    "publish": "npm run build",
+    "test": "ava"
   },
   "repository": {
     "type": "git",
@@ -29,8 +31,11 @@
     "parse5": "^2.1.5"
   },
   "devDependencies": {
+    "ava": "^0.14.0",
     "babel-preset-es2015-rollup": "^1.1.1",
     "rollup": "^0.25.8",
-    "rollup-plugin-babel": "^2.4.0"
+    "rollup-plugin-babel": "^2.4.0",
+    "rollup-plugin-sass": "0.0.8",
+    "rollup-plugin-string": "^1.0.1"
   }
 }
