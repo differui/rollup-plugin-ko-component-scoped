@@ -4,8 +4,13 @@ var hash  = require('hash-sum');
 const compiler = require('ko-component-compiler');
 const rollupPluginutils = require('rollup-pluginutils');
 
+// importee id prefix
 const SCOPED_PREFIX = 'scoped!';
 const SCOPED_PREFIX_LEN = SCOPED_PREFIX.length;
+
+// export format
+const SCOPED_FORMAT_ES2015 = 'es2015';
+const SCOPED_FORMAT_STRING = 'string';
 
 const buildInStyleLang = {
     '.css': '',
@@ -43,6 +48,8 @@ module.exports = function () {
     var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
     var filter = rollupPluginutils.createFilter(includeExtensions, options.exclude || 'node_modules/**');
 
+    options.format = options.format || SCOPED_FORMAT_ES2015;
+
     return {
         resolveId: function (importee, importer) {
             var importeeId;
@@ -76,8 +83,12 @@ module.exports = function () {
 
             return new Promise(function (resolve, reject) {
                 promise.then(function (result) {
+                    if (options.format === SCOPED_FORMAT_ES2015) {
+                        result.source = `export default ${JSON.stringify(result.source)};`;
+                    }
+
                     resolve({
-                        code: `export default ${JSON.stringify(result.source)}`,
+                        code: result.source,
                         map: { mappings: '' }
                     });
                 });

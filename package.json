@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-scoped",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Roll and create scoped style and template.",
   "main": "index.js",
   "scripts": {
