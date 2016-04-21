@@ -1,3 +1,3 @@
 import template3 from 'scoped!./asset/template3.jade';
 
-assert.is(template3, '<h1 799d7673="">World</h1>');
+assert.is(/<h1 \w{8}="">Hello<\/h1>/i.test(template3), true);
