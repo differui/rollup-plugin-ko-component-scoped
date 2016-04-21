@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import hash from 'hash-sum';
 import { resolve, parse } from 'path';
-import { compiler, processStyle, processTemplate } from 'ko-component-compiler';
+import { default as compiler, processStyle, processTemplate } from 'ko-component-compiler';
 import { has, eachDict } from './util';
 import { mockStyleNode, mockTemplateNode } from './template';
 import { style as styleLang, template as templateLang } from './lang';

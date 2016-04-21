@@ -5,11 +5,30 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var fs = require('fs');
 var hash = _interopDefault(require('hash-sum'));
 var path = require('path');
-var koComponentCompiler = require('ko-component-compiler');
+var compiler = require('ko-component-compiler');
+var compiler__default = _interopDefault(compiler);
 var parse5 = require('parse5');
 
 function has(target, key) {
     return target && target.hasOwnProperty(key);
+};
+
+function eachArray(target, callback, context) {
+    for (var i = 0, len = target.length; i < len; i += 1) {
+        var result = callback.call(context || null, target[i], i, target);
+
+        if (result === false) {
+            return;
+        }
+    }
+};
+
+function eachDict(target, callback, context) {
+    var keys = target ? Object.keys(target) : [];
+
+    eachArray(keys, function (key) {
+        return callback.call(context || null, key, target[key], target);
+    });
 };
 
 function mockStyleNode(code, lang, scoped) {
@@ -46,7 +65,15 @@ var scopePrefixLen = SCOPED_IMPORTEE_PREFIX.length;
 var scopedIdRe = new RegExp('^' + SCOPED_IMPORTEE_PREFIX, 'i');
 var scopedCodeMap = {};
 
-var index = (function (options) {
+var index = (function () {
+    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+
+    // apply compiler config
+    eachDict(options, function (key, value) {
+        compiler__default.config(key, value);
+    });
+
     return {
         resolveId: function resolveId(importee, importer) {
             if (!scopedIdRe.test(importee)) {
@@ -80,9 +107,9 @@ var index = (function (options) {
             var promise = void 0;
 
             if (has(style, ext)) {
-                promise = koComponentCompiler.processStyle(mockStyleNode(code, style[ext]), hashId, filePath);
+                promise = compiler.processStyle(mockStyleNode(code, style[ext]), hashId, filePath);
             } else if (has(template, ext)) {
-                promise = koComponentCompiler.processTemplate(mockTemplateNode(code, template[ext]), hashId, filePath);
+                promise = compiler.processTemplate(mockTemplateNode(code, template[ext]), hashId, filePath);
             }
 
             delete scopedCodeMap[id];
