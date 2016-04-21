@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
 import hash from 'hash-sum';
 import { resolve, parse } from 'path';
-import { processStyle, processTemplate } from 'ko-component-compiler';
-import { has } from './util';
+import { compiler, processStyle, processTemplate } from 'ko-component-compiler';
+import { has, eachDict } from './util';
 import { mockStyleNode, mockTemplateNode } from './template';
 import { style as styleLang, template as templateLang } from './lang';
 
@@ -14,7 +14,13 @@ const scopePrefixLen = SCOPED_IMPORTEE_PREFIX.length;
 const scopedIdRe = new RegExp('^' + SCOPED_IMPORTEE_PREFIX, 'i');
 const scopedCodeMap = {};
 
-export default (options) => {
+export default (options = {}) => {
+
+    // apply compiler config
+    eachDict(options, (key, value) => {
+        compiler.config(key, value);
+    });
+
     return {
         resolveId(importee, importer) {
             if (!scopedIdRe.test(importee)) {
