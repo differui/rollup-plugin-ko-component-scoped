@@ -6,11 +6,12 @@ import { has } from './util';
 import { mockStyleNode, mockTemplateNode } from './template';
 import { style as styleLang, template as templateLang } from './lang';
 
-const SCOPED_PREFIX = 'scoped!';
+const SCOPED_IMPORTEE_PREFIX = 'scoped!';
+const SCOPED_HASH_ID_PREFIX = '_s-';
 const SCOPED_EXTENSION = '.__scoped__';
 
-const scopePrefixLen = SCOPED_PREFIX.length;
-const scopedIdRe = new RegExp('^' + SCOPED_PREFIX, 'i');
+const scopePrefixLen = SCOPED_IMPORTEE_PREFIX.length;
+const scopedIdRe = new RegExp('^' + SCOPED_IMPORTEE_PREFIX, 'i');
 const scopedCodeMap = {};
 
 export default (options) => {
@@ -25,7 +26,7 @@ export default (options) => {
 
             scopedCodeMap[mockImporteeId] = {
                 path: realImporteeId,
-                hash: hash(importer)
+                hash: `${SCOPED_HASH_ID_PREFIX}${hash(importer)}`
             };
 
             return mockImporteeId;

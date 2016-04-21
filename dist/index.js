@@ -38,11 +38,12 @@ var template = {
     '.jade': 'jade'
 };
 
-var SCOPED_PREFIX = 'scoped!';
+var SCOPED_IMPORTEE_PREFIX = 'scoped!';
+var SCOPED_HASH_ID_PREFIX = '_s-';
 var SCOPED_EXTENSION = '.__scoped__';
 
-var scopePrefixLen = SCOPED_PREFIX.length;
-var scopedIdRe = new RegExp('^' + SCOPED_PREFIX, 'i');
+var scopePrefixLen = SCOPED_IMPORTEE_PREFIX.length;
+var scopedIdRe = new RegExp('^' + SCOPED_IMPORTEE_PREFIX, 'i');
 var scopedCodeMap = {};
 
 var index = (function (options) {
@@ -57,7 +58,7 @@ var index = (function (options) {
 
             scopedCodeMap[mockImporteeId] = {
                 path: realImporteeId,
-                hash: hash(importer)
+                hash: '' + SCOPED_HASH_ID_PREFIX + hash(importer)
             };
 
             return mockImporteeId;
